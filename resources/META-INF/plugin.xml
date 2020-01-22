@@ -1,0 +1,39 @@
+<idea-plugin>
+  <id>info.rayden.voldeskine.dependencies</id>
+  <name>Clear Dependencies</name>
+  <version>1.0</version>
+  <vendor email="rayden@voldenskine.info" url="http://voldeskine.info/">Second Order</vendor>
+
+  <description><![CDATA[
+      This is a short description. Not enough? Here more.
+    ]]></description>
+
+  <change-notes><![CDATA[
+Those are change notes. And these are, too.
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="173.0"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+  <depends>org.jetbrains.android</depends>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <toolWindow id="Dependencies"
+                icon="/Resources/plus.png"
+                anchor="right"
+                factoryClass="DependenciesToolWindowFactory"/>
+
+  </extensions>
+
+  <actions>
+    <!-- Add your actions here -->
+  </actions>
+
+</idea-plugin>
