@@ -5,21 +5,43 @@ import org.jetbrains.annotations.Nullable;
 public class Dependency {
 
     public enum Type{
-        DEPENDENCY, SEPARATOR, MESSAGE
+        DEPENDENCY, MESSAGE
+    }
+
+    public enum Style{
+        DEFAULT, SEPARATOR, GRAYEDOUT
     }
 
     private String name;
     private Type type;
+
+    private Style style;
 
     private @Nullable VirtualFile file;
 
     public Dependency(@NotNull String name, @NotNull Type type){
         this.name = name;
         this.type = type;
+        this.style = Style.DEFAULT;
     }
+
+    public Dependency(@NotNull String name, @NotNull Type type, @NotNull Style style){
+        this.name = name;
+        this.type = type;
+        this.style = style;
+    }
+
     public Dependency(@NotNull String name, @NotNull Type type, @Nullable VirtualFile file){
         this.name = name;
         this.type = type;
+        this.file = file;
+        this.style = Style.DEFAULT;
+    }
+
+    public Dependency(@NotNull String name, @NotNull Type type, @NotNull Style style, @Nullable VirtualFile file){
+        this.name = name;
+        this.type = type;
+        this.style = style;
         this.file = file;
     }
 
@@ -44,6 +66,10 @@ public class Dependency {
         return name;
     }
 
+
+    public Style getStyle() {
+        return style;
+    }
 
     @Nullable
     public VirtualFile getFile() {

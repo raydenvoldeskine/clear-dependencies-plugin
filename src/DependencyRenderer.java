@@ -25,11 +25,11 @@ public class DependencyRenderer extends JLabel implements ListCellRenderer<Depen
             setForeground(JBColor.WHITE);
         } else {
 
-            switch (entry.getType()){
+            switch (entry.getStyle()){
                 case SEPARATOR: setBackground(Color.decode("#ECECEC"));
                                 setForeground(JBColor.BLACK); break;
 
-                case MESSAGE:   setBackground(JBColor.WHITE);
+                case GRAYEDOUT: setBackground(JBColor.WHITE);
                                 setForeground(JBColor.LIGHT_GRAY); break;
                 default:
                                 setBackground(JBColor.WHITE);

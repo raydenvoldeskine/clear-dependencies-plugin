@@ -48,18 +48,18 @@ public class DependencyListViewModel extends Observable {
         DefaultListModel<Dependency> listModel = new DefaultListModel<>();
         Optional<ArrayList<Dependency>> outgoing = analyser.getOutgoingList();
         Optional<ArrayList<Dependency>> incoming = analyser.getIncomingList();
-        listModel.addElement(new Dependency("OUTGOING", Dependency.Type.SEPARATOR));
+        listModel.addElement(new Dependency("OUTGOING", Dependency.Type.MESSAGE, Dependency.Style.SEPARATOR));
         if (outgoing.isPresent()){
             outgoing.get().forEach(listModel::addElement);
         } else {
-            listModel.addElement(new Dependency("N/A", Dependency.Type.MESSAGE));
+            listModel.addElement(new Dependency("N/A", Dependency.Type.MESSAGE, Dependency.Style.GRAYEDOUT));
         }
 
-        listModel.addElement(new Dependency("INCOMING", Dependency.Type.SEPARATOR));
+        listModel.addElement(new Dependency("INCOMING", Dependency.Type.MESSAGE, Dependency.Style.SEPARATOR));
         if (incoming.isPresent()){
             incoming.get().forEach(listModel::addElement);
         } else {
-            listModel.addElement(new Dependency("N/A", Dependency.Type.MESSAGE));
+            listModel.addElement(new Dependency("N/A", Dependency.Type.MESSAGE, Dependency.Style.GRAYEDOUT));
         }
 
         return listModel;

@@ -75,8 +75,11 @@ public class CodeProcessorJava extends CodeProcessor {
                     }
                 }
             }
-            //Collection<PsiImportStatementBase> unusedImports = JavaCodeStyleManager.getInstance(analyser.getProject()).findRedundantImports(psiJavaFile);
-            //Collection<PsiImportStatementBase> copy = unusedImports;
+            Collection<PsiImportStatementBase> unusedImports = JavaCodeStyleManager.getInstance(analyser.getProject()).findRedundantImports(psiJavaFile);
+            for (PsiImportStatementBase base: unusedImports){
+                PsiJavaCodeReferenceElement ref = base.getImportReference();
+                String name = ref.getQualifiedName();
+            }
         }
         catch (IndexNotReadyException e) {
         }
