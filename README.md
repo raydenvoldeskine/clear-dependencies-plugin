@@ -1,7 +1,5 @@
 # Clear Dependencies Plug-In
 
-## Opening
-
 As we all know, optimal dependencies between classes, packages, components etc. are essential for the life and survival of the software product. Yet we naturally spend most of our developent time looking at code, as dependencies were barely existing. But they do, and, oh boy, how the do it. When not being taken care of, they grow and grow in count, assuring us hard hours and days spent trying to refactor. 
 
 ## What's in for me? 
