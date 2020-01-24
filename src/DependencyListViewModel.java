@@ -9,6 +9,7 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 
 import com.intellij.openapi.project.Project;
 
+import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,6 +67,12 @@ public class DependencyListViewModel extends Observable {
         }
 
         return listModel;
+    }
+
+    public void open(@Nullable VirtualFile file){
+        if (file != null && project != null){
+            FileEditorManager.getInstance(project).openFile(file, true);
+        }
     }
 
 

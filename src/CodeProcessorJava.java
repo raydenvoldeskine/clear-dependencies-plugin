@@ -1,4 +1,5 @@
 import com.intellij.openapi.project.IndexNotReadyException;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -41,7 +42,9 @@ public class CodeProcessorJava extends CodeProcessor {
                             String[] nameParts= fullName.split("\\.");
                             if (nameParts.length > 0){
                                 String className = nameParts[nameParts.length - 1];
-                                outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY));
+                                PsiElement element = ref.resolve();
+                                VirtualFile file = element != null? element.getContainingFile().getVirtualFile() : null;
+                                outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY, file));
                             }
                         }
                     }
@@ -63,7 +66,7 @@ public class CodeProcessorJava extends CodeProcessor {
                             if (!className.equals(getMainClassName(psiJavaFile))) { // skip itself
                                 if (psiClass.getContainingClass() == null){ // skip inner classes
                                     if (outgoing.stream().noneMatch(entry -> entry.getName().equals(className))){ // only allow unique items
-                                        outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY));
+                                        outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY, resolved.getContainingFile().getVirtualFile()));
                                     }
                                 }
                             }
@@ -104,7 +107,7 @@ public class CodeProcessorJava extends CodeProcessor {
                             String className = refClass.getName();
                             if (className != null){
                                 if (incoming.stream().noneMatch(entry -> entry.getName().equals(className))) {
-                                    incoming.add(new Dependency(className, Dependency.Type.DEPENDENCY));
+                                    incoming.add(new Dependency(className, Dependency.Type.DEPENDENCY, refFile.getVirtualFile()));
                                 }
                             }
                         }
