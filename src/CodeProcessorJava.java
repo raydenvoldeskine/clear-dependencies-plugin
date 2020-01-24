@@ -7,10 +7,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtil;
 import com.intellij.util.Query;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Optional;
+import java.util.*;
 
 public class CodeProcessorJava extends CodeProcessor {
 
@@ -36,8 +33,11 @@ public class CodeProcessorJava extends CodeProcessor {
 
             if (importList != null){
                 PsiImportStatementBase[] importBase = importList.getImportStatements();
+                Collection<PsiImportStatementBase> unusedImports = JavaCodeStyleManager.getInstance(analyser.getProject()).findRedundantImports(psiJavaFile);
+
                 for (PsiImportStatementBase base: importBase){
                     PsiJavaCodeReferenceElement ref = base.getImportReference();
+                    boolean isUnused = unusedImports != null? unusedImports.stream().anyMatch(unused -> unused == base) : false;
                     if (ref != null){
                         String fullName = ref.getQualifiedName();
                         if (!isExclusionReference(fullName)){
@@ -47,7 +47,14 @@ public class CodeProcessorJava extends CodeProcessor {
                                     String className = nameParts[nameParts.length - 1];
                                     PsiElement element = ref.resolve();
                                     VirtualFile file = element != null? element.getContainingFile().getVirtualFile() : null;
-                                    outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY, file));
+                                    if (outgoing.stream().noneMatch(entry -> entry.getName().equals(className))){
+                                        if (isUnused){
+                                            outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY, Dependency.Style.GRAYEDOUT, file));
+                                        } else {
+                                            outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY, file));
+                                        }
+
+                                    }
                                 }
                             }
                         }
@@ -75,11 +82,7 @@ public class CodeProcessorJava extends CodeProcessor {
                     }
                 }
             }
-            Collection<PsiImportStatementBase> unusedImports = JavaCodeStyleManager.getInstance(analyser.getProject()).findRedundantImports(psiJavaFile);
-            for (PsiImportStatementBase base: unusedImports){
-                PsiJavaCodeReferenceElement ref = base.getImportReference();
-                String name = ref.getQualifiedName();
-            }
+
         }
         catch (IndexNotReadyException e) {
         }
