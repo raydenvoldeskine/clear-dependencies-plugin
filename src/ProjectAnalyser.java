@@ -12,6 +12,7 @@ import java.util.Optional;
 abstract public class ProjectAnalyser {
 
     private CodeProcessor processor = new CodeProcessorUnknown(this);
+
     @Nonnull protected Project project;
 
     ProjectAnalyser(@Nonnull Project project){
@@ -37,5 +38,12 @@ abstract public class ProjectAnalyser {
     public Optional<ArrayList<Dependency>> getIncomingList(){
         return processor.getIncomingList();
     }
+
+
+    @Nonnull
+    public Project getProject() {
+        return project;
+    }
+
 
 }

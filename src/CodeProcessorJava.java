@@ -1,6 +1,7 @@
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtil;
@@ -31,30 +32,30 @@ public class CodeProcessorJava extends CodeProcessor {
         Optional<String> ownPackageID = analyser.getCorrespondingPackageID(psiJavaFile.getPackageName());
 
         PsiImportList importList = psiJavaFile.getImportList();
-        if (importList != null){
-            PsiImportStatementBase[] importBase = importList.getImportStatements();
-            for (PsiImportStatementBase base: importBase){
-                PsiJavaCodeReferenceElement ref = base.getImportReference();
-                if (ref != null){
-                    String fullName = ref.getQualifiedName();
-                    if (!isExclusionReference(fullName)){
-                        if (ownPackageID.isPresent() && fullName.startsWith(ownPackageID.get())){
-                            String[] nameParts= fullName.split("\\.");
-                            if (nameParts.length > 0){
-                                String className = nameParts[nameParts.length - 1];
-                                PsiElement element = ref.resolve();
-                                VirtualFile file = element != null? element.getContainingFile().getVirtualFile() : null;
-                                outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY, file));
+        try {
+
+            if (importList != null){
+                PsiImportStatementBase[] importBase = importList.getImportStatements();
+                for (PsiImportStatementBase base: importBase){
+                    PsiJavaCodeReferenceElement ref = base.getImportReference();
+                    if (ref != null){
+                        String fullName = ref.getQualifiedName();
+                        if (!isExclusionReference(fullName)){
+                            if (ownPackageID.isPresent() && fullName.startsWith(ownPackageID.get())){
+                                String[] nameParts= fullName.split("\\.");
+                                if (nameParts.length > 0){
+                                    String className = nameParts[nameParts.length - 1];
+                                    PsiElement element = ref.resolve();
+                                    VirtualFile file = element != null? element.getContainingFile().getVirtualFile() : null;
+                                    outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY, file));
+                                }
                             }
                         }
                     }
+
                 }
-
             }
-        }
 
-
-        try {
             Collection<PsiJavaCodeReferenceElement> embeddedRefs = PsiTreeUtil.collectElementsOfType(psiJavaFile.getOriginalElement(), PsiJavaCodeReferenceElement.class);
             for (PsiJavaCodeReferenceElement element: embeddedRefs){
                 if (element.getQualifiedName().startsWith(psiJavaFile.getPackageName())){
@@ -74,9 +75,12 @@ public class CodeProcessorJava extends CodeProcessor {
                     }
                 }
             }
+            //Collection<PsiImportStatementBase> unusedImports = JavaCodeStyleManager.getInstance(analyser.getProject()).findRedundantImports(psiJavaFile);
+            //Collection<PsiImportStatementBase> copy = unusedImports;
         }
         catch (IndexNotReadyException e) {
         }
+
 
         outgoing.sort(new Comparator<Dependency>() {
             public int compare(Dependency entry1, Dependency entry2) {
