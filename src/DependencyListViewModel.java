@@ -21,11 +21,7 @@ public class DependencyListViewModel extends Observable {
     private @Nullable  Project project;
     private @Nullable FileEditor editor;
     private ProjectAnalyser analyser;
-    private String[] exclusions = {
-            "java.",
-            "android.",
-            "org."
-    };
+
 
     public DependencyListViewModel(){
 
