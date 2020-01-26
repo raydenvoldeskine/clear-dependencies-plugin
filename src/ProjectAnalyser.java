@@ -13,16 +13,16 @@ abstract public class ProjectAnalyser {
 
     private CodeProcessor processor = new CodeProcessorUnknown(this);
 
-    @Nonnull protected Project project;
+    @Nullable  protected Project project;
 
-    ProjectAnalyser(@Nonnull Project project){
+    ProjectAnalyser(@Nullable  Project project){
         this.project = project;
     }
 
     abstract Optional<String> getCorrespondingPackageID(String codePackageID);
 
     public void setCurrentEditor(FileEditor editor){
-        if (editor != null) {
+        if (editor != null && project != null) {
             VirtualFile file = editor.getFile();
             if (file != null) {
                 PsiFile currentFile = PsiManager.getInstance(project).findFile(file);
@@ -40,7 +40,7 @@ abstract public class ProjectAnalyser {
     }
 
 
-    @Nonnull
+    @Nullable
     public Project getProject() {
         return project;
     }

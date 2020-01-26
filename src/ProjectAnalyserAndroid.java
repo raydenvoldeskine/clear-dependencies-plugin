@@ -10,6 +10,7 @@ import org.jetbrains.android.facet.AndroidFacet;
 import org.jetbrains.android.facet.AndroidRootUtil;
 import org.jetbrains.android.util.AndroidUtils;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -17,7 +18,7 @@ public class ProjectAnalyserAndroid extends ProjectAnalyser {
 
     private ArrayList<String> packageIDs = new ArrayList<>();
 
-    public ProjectAnalyserAndroid(Project project){
+    public ProjectAnalyserAndroid(@Nullable Project project){
         super(project);
         packageIDs = getAllPackageIds(project);
     }

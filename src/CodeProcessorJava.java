@@ -1,4 +1,5 @@
 import com.intellij.openapi.project.IndexNotReadyException;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
@@ -30,10 +31,10 @@ public class CodeProcessorJava extends CodeProcessor {
 
         PsiImportList importList = psiJavaFile.getImportList();
         try {
-
-            if (importList != null){
+            Project project = analyser.getProject();
+            if (importList != null && project != null){
                 PsiImportStatementBase[] importBase = importList.getImportStatements();
-                Collection<PsiImportStatementBase> unusedImports = JavaCodeStyleManager.getInstance(analyser.getProject()).findRedundantImports(psiJavaFile);
+                Collection<PsiImportStatementBase> unusedImports = JavaCodeStyleManager.getInstance(project).findRedundantImports(psiJavaFile);
 
                 for (PsiImportStatementBase base: importBase){
                     PsiJavaCodeReferenceElement ref = base.getImportReference();
