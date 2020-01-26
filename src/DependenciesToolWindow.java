@@ -12,6 +12,7 @@ public class DependenciesToolWindow implements Observer {
     private JPanel myToolWindowContent;
     private JList<Dependency> list;
     private JScrollPane panel;
+    private JLabel scoreTotal;
 
     private DependencyListViewModel viewModel = new DependencyListViewModel();
 
@@ -41,6 +42,14 @@ public class DependenciesToolWindow implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        list.setModel(viewModel.getModel());
+        DefaultListModel<Dependency> model = viewModel.getModel();
+        list.setModel(model);
+        int outgoingCount = 0;
+        int incomingCount = 0;
+        for (int i = 0; i < model.size(); i++){
+            outgoingCount += (model.get(i).getType() == Dependency.Type.OUTGOING) ? 1 : 0;
+            incomingCount += (model.get(i).getType() == Dependency.Type.INCOMING) ? 1 : 0;
+        }
+        scoreTotal.setText("" + outgoingCount + ":" + incomingCount);
     }
 }

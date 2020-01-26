@@ -49,9 +49,9 @@ public class CodeProcessorJava extends CodeProcessor {
                                     VirtualFile file = element != null? element.getContainingFile().getVirtualFile() : null;
                                     if (outgoing.stream().noneMatch(entry -> entry.getName().equals(className))){
                                         if (isUnused){
-                                            outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY, Dependency.Style.GRAYEDOUT, file));
+                                            outgoing.add(new Dependency(className, Dependency.Type.OUTGOING, Dependency.Style.GRAYEDOUT, file));
                                         } else {
-                                            outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY, file));
+                                            outgoing.add(new Dependency(className, Dependency.Type.OUTGOING, file));
                                         }
 
                                     }
@@ -74,7 +74,7 @@ public class CodeProcessorJava extends CodeProcessor {
                             if (!className.equals(getMainClassName(psiJavaFile))) { // skip itself
                                 if (psiClass.getContainingClass() == null){ // skip inner classes
                                     if (outgoing.stream().noneMatch(entry -> entry.getName().equals(className))){ // only allow unique items
-                                        outgoing.add(new Dependency(className, Dependency.Type.DEPENDENCY, resolved.getContainingFile().getVirtualFile()));
+                                        outgoing.add(new Dependency(className, Dependency.Type.OUTGOING, resolved.getContainingFile().getVirtualFile()));
                                     }
                                 }
                             }
@@ -117,7 +117,7 @@ public class CodeProcessorJava extends CodeProcessor {
                             String className = refClass.getName();
                             if (className != null){
                                 if (incoming.stream().noneMatch(entry -> entry.getName().equals(className))) {
-                                    incoming.add(new Dependency(className, Dependency.Type.DEPENDENCY, refFile.getVirtualFile()));
+                                    incoming.add(new Dependency(className, Dependency.Type.INCOMING, refFile.getVirtualFile()));
                                 }
                             }
                         }

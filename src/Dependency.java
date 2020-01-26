@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 public class Dependency {
 
     public enum Type{
-        DEPENDENCY, MESSAGE
+        INCOMING, OUTGOING, MESSAGE
     }
 
     public enum Style{
