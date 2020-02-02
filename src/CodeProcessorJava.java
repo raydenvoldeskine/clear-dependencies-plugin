@@ -43,9 +43,9 @@ public class CodeProcessorJava extends CodeProcessor {
                         String fullName = ref.getQualifiedName();
                         if (!isExclusionReference(fullName)){
                             if (ownPackageID.isPresent() && fullName.startsWith(ownPackageID.get())){
-                                String[] nameParts= fullName.split("\\.");
-                                if (nameParts.length > 0){
-                                    String className = nameParts[nameParts.length - 1];
+                                PackageId packageId = new PackageId(fullName);
+                                if (packageId.count() > 0){
+                                    String className = packageId.getLast();
                                     PsiElement element = ref.resolve();
                                     VirtualFile file = element != null? element.getContainingFile().getVirtualFile() : null;
                                     if (outgoing.stream().noneMatch(entry -> entry.getName().equals(className))){
