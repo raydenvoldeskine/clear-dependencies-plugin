@@ -27,13 +27,14 @@ public class CodeProcessorJava extends CodeProcessor {
     @Override
     public Optional<ArrayList<Dependency>> getOutgoingList() {
         ArrayList<Dependency> outgoing = new ArrayList<>();
-        Optional<PackageId> ownPackageID = analyser.getCorrespondingPackageId(psiJavaFile.getPackageName());
-        List<PackageId> allProjectPackages = analyser.getAllPackages();
-        HashMap<String, Integer> outgoingPackageReferences = new HashMap<>();
 
-        PsiImportList importList = psiJavaFile.getImportList();
         try {
             Project project = analyser.getProject();
+            PsiImportList importList = psiJavaFile.getImportList();
+            Optional<PackageId> ownPackageID = analyser.getCorrespondingPackageId(psiJavaFile.getPackageName());
+            List<PackageId> allProjectPackages = analyser.getAllPackages();
+            HashMap<String, Integer> outgoingPackageReferences = new HashMap<>();
+
             if (importList != null && project != null && ownPackageID.isPresent()){
                 PsiImportStatementBase[] importBase = importList.getImportStatements();
                 Collection<PsiImportStatementBase> unusedImports = JavaCodeStyleManager.getInstance(project).findRedundantImports(psiJavaFile);
@@ -84,6 +85,7 @@ public class CodeProcessorJava extends CodeProcessor {
 
             }
 
+            // Dependencies from the same package are not listed in imports, so they have to be detected separately
             Collection<PsiJavaCodeReferenceElement> embeddedRefs = PsiTreeUtil.collectElementsOfType(psiJavaFile.getOriginalElement(), PsiJavaCodeReferenceElement.class);
             for (PsiJavaCodeReferenceElement element: embeddedRefs){
                 if (element.getQualifiedName().startsWith(psiJavaFile.getPackageName())){
