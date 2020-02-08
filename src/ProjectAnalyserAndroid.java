@@ -12,6 +12,7 @@ import org.jetbrains.android.util.AndroidUtils;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class ProjectAnalyserAndroid extends ProjectAnalyser {
@@ -27,6 +28,10 @@ public class ProjectAnalyserAndroid extends ProjectAnalyser {
                 .stream()
                 .filter(packageId -> codePackageID.startsWith(packageId.toString()))
                 .findFirst();
+    }
+
+    public List<PackageId> getAllPackages(){
+        return packageIDs;
     }
 
     private ArrayList<PackageId> getAllPackageIds(Project project){

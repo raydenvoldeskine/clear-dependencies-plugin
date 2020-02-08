@@ -28,11 +28,15 @@ public class PackageId {
         return parts.length > index ? parts[index] : null;
     }
 
-    public boolean hasCommonPart(@Nonnull PackageId other){
-        return !getCommonPart(other).isEmpty();
+    public boolean hasCommonMoreThatRootPart(@Nonnull PackageId other){
+        return !getCommonPartPackageId(other).isEmpty() && getCommonPartPackageId(other).count() > 1;
     }
 
     public String getCommonPart(@Nonnull PackageId other){
+        return getCommonPartPackageId(other).toString();
+    }
+
+    private PackageId getCommonPartPackageId(@Nonnull PackageId other){
 
         StringJoiner joiner = new StringJoiner(".");
         for (int i = 0; i < count(); i++){
@@ -41,10 +45,10 @@ public class PackageId {
             if (ownPart != null && otherPart != null && ownPart.equals(otherPart)){
                 joiner.add(ownPart);
             } else {
-                return joiner.toString();
+                return new PackageId(joiner.toString());
             }
         }
-        return joiner.toString();
+        return new PackageId(joiner.toString());
     }
 
     @Override

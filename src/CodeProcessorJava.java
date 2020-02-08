@@ -28,11 +28,13 @@ public class CodeProcessorJava extends CodeProcessor {
     public Optional<ArrayList<Dependency>> getOutgoingList() {
         ArrayList<Dependency> outgoing = new ArrayList<>();
         Optional<PackageId> ownPackageID = analyser.getCorrespondingPackageId(psiJavaFile.getPackageName());
+        List<PackageId> allProjectPackages = analyser.getAllPackages();
+        HashMap<String, Integer> outgoingPackageReferences = new HashMap<>();
 
         PsiImportList importList = psiJavaFile.getImportList();
         try {
             Project project = analyser.getProject();
-            if (importList != null && project != null){
+            if (importList != null && project != null && ownPackageID.isPresent()){
                 PsiImportStatementBase[] importBase = importList.getImportStatements();
                 Collection<PsiImportStatementBase> unusedImports = JavaCodeStyleManager.getInstance(project).findRedundantImports(psiJavaFile);
 
@@ -43,7 +45,7 @@ public class CodeProcessorJava extends CodeProcessor {
                         String fullName = ref.getQualifiedName();
                         if (!isExclusionReference(fullName)){
                             PackageId packageId = new PackageId(fullName);
-                            if (ownPackageID.isPresent() && packageId.doesBeginWith(ownPackageID.get())){
+                            if (packageId.doesBeginWith(ownPackageID.get())){
                                 if (!packageId.isEmpty()){
                                     String className = packageId.getLast();
                                     PsiElement element = ref.resolve();
@@ -56,11 +58,30 @@ public class CodeProcessorJava extends CodeProcessor {
                                         }
                                     }
                                 }
+                            } else {
+                                Optional<PackageId> otherProjectPackage = allProjectPackages
+                                        .stream()
+                                        .filter(id -> id.hasCommonMoreThatRootPart(packageId))
+                                        .findFirst();
+                                if (otherProjectPackage.isPresent()){
+                                    String key = otherProjectPackage.get().toString();
+                                    if (!outgoingPackageReferences.containsKey(key)){
+                                        outgoingPackageReferences.put(key, 0);
+                                    } else {
+                                        outgoingPackageReferences.put(key, outgoingPackageReferences.get(key) + 1 );
+                                    }
+                                }
                             }
                         }
                     }
-
                 }
+
+                for (Map.Entry<String, Integer> entry : outgoingPackageReferences.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+                    outgoing.add(new Dependency(key + " " + "(" + value + ")", Dependency.Type.OUTGOING));
+                }
+
             }
 
             Collection<PsiJavaCodeReferenceElement> embeddedRefs = PsiTreeUtil.collectElementsOfType(psiJavaFile.getOriginalElement(), PsiJavaCodeReferenceElement.class);

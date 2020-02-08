@@ -7,6 +7,7 @@ import com.intellij.psi.PsiManager;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 abstract public class ProjectAnalyser {
@@ -20,6 +21,7 @@ abstract public class ProjectAnalyser {
     }
 
     abstract Optional<PackageId> getCorrespondingPackageId(String codePackageID);
+    abstract List<PackageId> getAllPackages();
 
     public void setCurrentEditor(FileEditor editor){
         if (editor != null && project != null) {
