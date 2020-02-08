@@ -27,7 +27,7 @@ public class CodeProcessorJava extends CodeProcessor {
     @Override
     public Optional<ArrayList<Dependency>> getOutgoingList() {
         ArrayList<Dependency> outgoing = new ArrayList<>();
-        Optional<String> ownPackageID = analyser.getCorrespondingPackageID(psiJavaFile.getPackageName());
+        Optional<PackageId> ownPackageID = analyser.getCorrespondingPackageId(psiJavaFile.getPackageName());
 
         PsiImportList importList = psiJavaFile.getImportList();
         try {
@@ -38,23 +38,22 @@ public class CodeProcessorJava extends CodeProcessor {
 
                 for (PsiImportStatementBase base: importBase){
                     PsiJavaCodeReferenceElement ref = base.getImportReference();
-                    boolean isUnused = unusedImports != null? unusedImports.stream().anyMatch(unused -> unused == base) : false;
+                    boolean isUnused = unusedImports != null && unusedImports.stream().anyMatch(unused -> unused == base);
                     if (ref != null){
                         String fullName = ref.getQualifiedName();
                         if (!isExclusionReference(fullName)){
-                            if (ownPackageID.isPresent() && fullName.startsWith(ownPackageID.get())){
-                                PackageId packageId = new PackageId(fullName);
-                                if (packageId.count() > 0){
+                            PackageId packageId = new PackageId(fullName);
+                            if (ownPackageID.isPresent() && packageId.doesBeginWith(ownPackageID.get())){
+                                if (!packageId.isEmpty()){
                                     String className = packageId.getLast();
                                     PsiElement element = ref.resolve();
                                     VirtualFile file = element != null? element.getContainingFile().getVirtualFile() : null;
                                     if (outgoing.stream().noneMatch(entry -> entry.getName().equals(className))){
-                                        if (isUnused){
+                                        if (isUnused) {
                                             outgoing.add(new Dependency(className, Dependency.Type.OUTGOING, Dependency.Style.GRAYEDOUT, file));
                                         } else {
                                             outgoing.add(new Dependency(className, Dependency.Type.OUTGOING, file));
                                         }
-
                                     }
                                 }
                             }

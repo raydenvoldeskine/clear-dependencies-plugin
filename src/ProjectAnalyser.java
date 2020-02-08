@@ -19,7 +19,7 @@ abstract public class ProjectAnalyser {
         this.project = project;
     }
 
-    abstract Optional<String> getCorrespondingPackageID(String codePackageID);
+    abstract Optional<PackageId> getCorrespondingPackageId(String codePackageID);
 
     public void setCurrentEditor(FileEditor editor){
         if (editor != null && project != null) {

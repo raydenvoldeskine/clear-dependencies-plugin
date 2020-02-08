@@ -47,6 +47,15 @@ public class PackageId {
         return joiner.toString();
     }
 
+    @Override
+    public String toString(){
+        return String.join(".", parts);
+    }
+
+    public boolean isEmpty(){
+        return count() == 0;
+    }
+
     public boolean doesBeginWith(@NotNull PackageId other){
         for (int i = 0; i < other.count(); i++){
             String ownPart = getPart(i);

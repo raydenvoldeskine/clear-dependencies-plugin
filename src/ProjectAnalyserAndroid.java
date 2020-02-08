@@ -16,22 +16,21 @@ import java.util.Optional;
 
 public class ProjectAnalyserAndroid extends ProjectAnalyser {
 
-    private ArrayList<String> packageIDs = new ArrayList<>();
+    private ArrayList<PackageId> packageIDs = new ArrayList<>();
 
     public ProjectAnalyserAndroid(@Nullable Project project){
         super(project);
         packageIDs = getAllPackageIds(project);
     }
-    public Optional<String> getCorrespondingPackageID(String codePackageID){
-        Optional<String> ownPackageID = packageIDs
+    public Optional<PackageId> getCorrespondingPackageId(String codePackageID){
+        return packageIDs
                 .stream()
-                .filter(codePackageID::startsWith)
+                .filter(packageId -> codePackageID.startsWith(packageId.toString()))
                 .findFirst();
-        return ownPackageID;
     }
 
-    private ArrayList<String> getAllPackageIds(Project project){
-        ArrayList<String> all = new ArrayList<>();
+    private ArrayList<PackageId> getAllPackageIds(Project project){
+        ArrayList<PackageId> all = new ArrayList<>();
         for (Module module: ModuleManager.getInstance(project).getModules()){
             for (Facet facet: FacetManager.getInstance(module).getAllFacets()){
                 if (facet instanceof AndroidFacet){
@@ -42,7 +41,7 @@ public class ProjectAnalyserAndroid extends ProjectAnalyser {
                         if (manifest != null){
                             GenericAttributeValue<String> pack = manifest.getPackage();
                             if (pack != null){
-                                all.add(pack.toString());
+                                all.add(new PackageId(pack.toString()));
                             }
                         }
                     }
