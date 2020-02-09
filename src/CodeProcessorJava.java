@@ -9,6 +9,7 @@ import com.intellij.psi.util.PsiUtil;
 import com.intellij.util.Query;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CodeProcessorJava extends CodeProcessor {
 
@@ -36,52 +37,60 @@ public class CodeProcessorJava extends CodeProcessor {
             HashMap<String, Integer> outgoingPackageReferences = new HashMap<>();
 
             if (importList != null && project != null && ownPackageID.isPresent()){
-                PsiImportStatementBase[] importBase = importList.getImportStatements();
-                Collection<PsiImportStatementBase> unusedImports = JavaCodeStyleManager.getInstance(project).findRedundantImports(psiJavaFile);
 
-                for (PsiImportStatementBase base: importBase){
-                    PsiJavaCodeReferenceElement ref = base.getImportReference();
-                    if (ref != null){
-                        String fullName = ref.getQualifiedName();
-                        if (!isExclusionReference(fullName)){
-                            PackageId packageId = new PackageId(fullName);
-                            if (packageId.doesBeginWith(ownPackageID.get())){
-                                if (!packageId.isEmpty()){
-                                    String className = packageId.getLast();
-                                    PsiElement element = ref.resolve();
-                                    VirtualFile file = element != null? element.getContainingFile().getVirtualFile() : null;
-                                    if (outgoing.stream().noneMatch(entry -> entry.getName().equals(className))){
-                                        boolean isUnused = unusedImports != null && unusedImports.stream().anyMatch(unused -> unused == base);
-                                        if (isUnused) {
-                                            outgoing.add(new Dependency(className, Dependency.Type.OUTGOING, Dependency.Style.GRAYEDOUT, file));
-                                        } else {
-                                            outgoing.add(new Dependency(className, Dependency.Type.OUTGOING, file));
-                                        }
-                                    }
-                                }
-                            } else {
-                                Optional<PackageId> otherProjectPackage = allProjectPackages
-                                        .stream()
-                                        .filter(id -> id.hasCommonMoreThatRootPart(packageId))
-                                        .findFirst();
-                                if (otherProjectPackage.isPresent()){
-                                    String key = otherProjectPackage.get().toString();
-                                    if (!outgoingPackageReferences.containsKey(key)){
-                                        outgoingPackageReferences.put(key, 0);
-                                    } else {
-                                        outgoingPackageReferences.put(key, outgoingPackageReferences.get(key) + 1 );
-                                    }
+                Collection<PsiImportStatementBase> unusedImports = JavaCodeStyleManager.getInstance(project).findRedundantImports(psiJavaFile);
+                unusedImports = unusedImports != null? unusedImports : new ArrayList<PsiImportStatementBase>();
+                List<String> unused = unusedImports.stream()
+                        .map(PsiImportStatementBase::getImportReference)
+                        .filter(Objects::nonNull)
+                        .map(PsiJavaCodeReferenceElement::getQualifiedName)
+                        .collect(Collectors.toList());
+
+                List<Dependency> imports = Arrays.stream(importList.getImportStatements())
+                        .map(PsiImportStatementBase::getImportReference)
+                        .filter(Objects::nonNull)
+                        .filter(ref -> !isExclusionReference(ref.getQualifiedName()))
+                        .map(ref -> new AbstractMap.SimpleImmutableEntry<PsiJavaCodeReferenceElement, PackageId>(ref, new PackageId(ref.getQualifiedName())))
+                        .filter(entry -> entry.getValue().doesBeginWith(ownPackageID.get()))
+                        .filter(entry -> !entry.getValue().isEmpty())
+                        .map(entry -> new AbstractMap.SimpleImmutableEntry<PsiElement, PackageId>(entry.getKey().resolve(), entry.getValue()))
+                        .map(entry -> new Dependency(
+                                entry.getValue().getLast(),
+                                Dependency.Type.OUTGOING,
+                                unused.stream().anyMatch(unusedName -> unusedName.equals(entry.getValue().toString())) ? Dependency.Style.GRAYEDOUT : Dependency.Style.DEFAULT,
+                                entry.getKey() != null? entry.getKey().getContainingFile().getVirtualFile() : null))
+                        .collect(Collectors.toList());
+
+
+                outgoing.addAll(imports.stream()
+                        .filter(ref -> outgoing.stream().noneMatch(entry -> entry.getName().equals(ref.getName())))
+                        .collect(Collectors.toList()));
+
+                Arrays.stream(importList.getImportStatements())
+                        .map(PsiImportStatementBase::getImportReference)
+                        .filter(Objects::nonNull)
+                        .filter(ref -> !isExclusionReference(ref.getQualifiedName()))
+                        .map(ref -> new PackageId(ref.getQualifiedName()))
+                        .filter(packageId -> !packageId.doesBeginWith(ownPackageID.get()))
+                        .filter(packageId -> !packageId.isEmpty())
+                        .forEach(packageId -> {
+                            Optional<PackageId> otherProjectPackage = allProjectPackages
+                                    .stream()
+                                    .filter(id -> id.hasCommonMoreThatRootPart(packageId))
+                                    .findFirst();
+                            if (otherProjectPackage.isPresent()){
+                                String key = otherProjectPackage.get().toString();
+                                if (!outgoingPackageReferences.containsKey(key)){
+                                    outgoingPackageReferences.put(key, 0);
+                                } else {
+                                    outgoingPackageReferences.put(key, outgoingPackageReferences.get(key) + 1 );
                                 }
                             }
-                        }
-                    }
-                }
+                         });
 
-                for (Map.Entry<String, Integer> entry : outgoingPackageReferences.entrySet()) {
-                    String key = entry.getKey();
-                    Object value = entry.getValue();
-                    outgoing.add(new Dependency(key + " " + "(" + value + ")", Dependency.Type.OUTGOING));
-                }
+                outgoing.addAll(outgoingPackageReferences.entrySet().stream()
+                        .map(entry -> new Dependency(entry.getKey() + " " + "(" + entry.getValue() + ")", Dependency.Type.OUTGOING))
+                        .collect(Collectors.toList()));
 
             }
 
