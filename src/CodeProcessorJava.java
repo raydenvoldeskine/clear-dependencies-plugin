@@ -41,7 +41,6 @@ public class CodeProcessorJava extends CodeProcessor {
 
                 for (PsiImportStatementBase base: importBase){
                     PsiJavaCodeReferenceElement ref = base.getImportReference();
-                    boolean isUnused = unusedImports != null && unusedImports.stream().anyMatch(unused -> unused == base);
                     if (ref != null){
                         String fullName = ref.getQualifiedName();
                         if (!isExclusionReference(fullName)){
@@ -52,6 +51,7 @@ public class CodeProcessorJava extends CodeProcessor {
                                     PsiElement element = ref.resolve();
                                     VirtualFile file = element != null? element.getContainingFile().getVirtualFile() : null;
                                     if (outgoing.stream().noneMatch(entry -> entry.getName().equals(className))){
+                                        boolean isUnused = unusedImports != null && unusedImports.stream().anyMatch(unused -> unused == base);
                                         if (isUnused) {
                                             outgoing.add(new Dependency(className, Dependency.Type.OUTGOING, Dependency.Style.GRAYEDOUT, file));
                                         } else {
