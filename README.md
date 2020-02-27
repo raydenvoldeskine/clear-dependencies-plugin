@@ -10,6 +10,13 @@ This plugin aims to reveal your dependencies during coding, so you'd get a chanc
 * Surprising class depends on yours 
 * Cyclic dependencies considered generally evil, except for the classes in the same package 
 
+## How does it look like?
+
+It's an additional panel you can activate:
+
+![screenshot](https://github.com/raydenvoldeskine/clear-dependencies-plugin/blob/master/Screenshot.png "Screenshot")
+
+
 ## Availability 
 
 Current version support Java Android projects only. Chances are more support follows, as far as I add some more dependencies to this project. 
