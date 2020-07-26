@@ -1,17 +1,18 @@
 
 
 import com.intellij.ide.DataManager;
-import com.intellij.openapi.actionSystem.DataConstants;
-import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
-import com.intellij.openapi.fileEditor.FileEditorManagerListener;
+import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.actionSystem.DataKeys;
+import com.intellij.openapi.fileEditor.*;
 
 import com.intellij.openapi.project.Project;
 
+import com.intellij.openapi.util.AsyncResult;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.messages.MessageBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.concurrency.Promise;
 
 import javax.swing.*;
 import java.util.*;
@@ -25,11 +26,34 @@ public class DependencyListViewModel extends Observable {
 
     public DependencyListViewModel(){
 
-        this.project = (Project) DataManager.getInstance().getDataContext().getData(DataConstants.PROJECT);
+        DataContext dataContext = DataManager.getInstance().getDataContext();
+        this.project = DataKeys.PROJECT.getData(dataContext);
         this.analyser = ProjectAnalyserFactory.createAnalyser(project);
         if (project != null){
             editor = FileEditorManager.getInstance(project).getSelectedEditor();
             analyser.setCurrentEditor(editor);
+            MessageBus messageBus = project.getMessageBus();
+            messageBus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerAdapter() {
+                @Override
+                public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
+                    super.fileOpened(source, file);
+                }
+
+                @Override
+                public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
+                    super.fileClosed(source, file);
+                }
+
+                @Override
+                public void selectionChanged(@NotNull FileEditorManagerEvent event) {
+                    super.selectionChanged(event);
+                    editor = FileEditorManager.getInstance(project).getSelectedEditor();
+                    analyser.setCurrentEditor(editor);
+                    setChanged();
+                    notifyObservers();
+                }
+            });
+            /*
             FileEditorManager.getInstance(project).addFileEditorManagerListener(new FileEditorManagerListener() {
                 @Override
                 public void selectionChanged(@NotNull FileEditorManagerEvent event) {
@@ -38,7 +62,7 @@ public class DependencyListViewModel extends Observable {
                     setChanged();
                     notifyObservers();
                 }
-            });
+            }); */
         }
     }
 
