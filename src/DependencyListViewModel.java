@@ -7,13 +7,13 @@ import com.intellij.openapi.fileEditor.*;
 
 import com.intellij.openapi.project.Project;
 
-import com.intellij.openapi.util.AsyncResult;
+
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.messages.MessageBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.concurrency.Promise;
 
+
+import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.util.*;
 
@@ -32,37 +32,16 @@ public class DependencyListViewModel extends Observable {
         if (project != null){
             editor = FileEditorManager.getInstance(project).getSelectedEditor();
             analyser.setCurrentEditor(editor);
-            MessageBus messageBus = project.getMessageBus();
-            messageBus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerAdapter() {
-                @Override
-                public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-                    super.fileOpened(source, file);
-                }
 
+            project.getMessageBus().connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
                 @Override
-                public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-                    super.fileClosed(source, file);
-                }
-
-                @Override
-                public void selectionChanged(@NotNull FileEditorManagerEvent event) {
-                    super.selectionChanged(event);
+                public void selectionChanged(@Nonnull FileEditorManagerEvent event) {
                     editor = FileEditorManager.getInstance(project).getSelectedEditor();
                     analyser.setCurrentEditor(editor);
                     setChanged();
                     notifyObservers();
                 }
             });
-            /*
-            FileEditorManager.getInstance(project).addFileEditorManagerListener(new FileEditorManagerListener() {
-                @Override
-                public void selectionChanged(@NotNull FileEditorManagerEvent event) {
-                    editor = FileEditorManager.getInstance(project).getSelectedEditor();
-                    analyser.setCurrentEditor(editor);
-                    setChanged();
-                    notifyObservers();
-                }
-            }); */
         }
     }
 
